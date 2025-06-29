@@ -19,3 +19,13 @@ jobs:
       - name: Dependencies
         run: npm install
     
+      - name: SC Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env: 
+          SONAR_TOKEN: ${{ secrets.SONAR}}
+        with:
+          args: |
+            -Dsonar.projectKey=sebalvarezch_laboratorio-final
+            -Dsonar.organization=sebalvarezch
+            -Dsonar.sources=.
+            -Dsonar.host.url=https://sonarcloud.io
