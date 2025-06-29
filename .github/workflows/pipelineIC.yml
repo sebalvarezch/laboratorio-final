@@ -24,7 +24,7 @@ jobs:
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR}}
         with:
-          args >
+          args |
             -Dsonar.projectKey=sebalvarezch_laboratorio_final
             -Dsonar.organization=sebalvarezch
             -Dsonar.sources=.
