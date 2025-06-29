@@ -18,6 +18,4 @@ jobs:
       
       - name: Dependencies
         run: npm install
-      
-      - name: echo test
-        echo: 'Checkout, node y npm install done'
+    
