@@ -21,7 +21,7 @@ jobs:
     
       - name: SC Scan
         env: 
-          SONAR_TOKEN: ${{ secrets.982fe43c2c8123e20ad54616126802681b8aa9af}}
+          SONAR_TOKEN: ${{ secrets.SONAR}}
         run:
           npx sonar-scanner \
           -Dsonar.projectKey=sebalvarezch_laboratorio-final \
