@@ -22,7 +22,7 @@ jobs:
       - name: SC Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env: 
-          SONAR_TOKEN: ${{ secrets.SONAR}}
+          SONAR_TOKEN: ${{ secrets.SONAR }}
         with:
           args: |
             -Dsonar.projectKey=sebalvarezch_laboratorio-final
@@ -30,4 +30,8 @@ jobs:
             -Dsonar.sources=.
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.branch.name=main
-            
+
+      - name: Chequeo de calidad
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        env: 
+          SONAR_TOKEN: ${{ secrets.SONAR }}
