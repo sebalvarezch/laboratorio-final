@@ -7,5 +7,5 @@ jobs:
   SAST:
     runs-on: ubuntu-latest
     steps:
-    - name: Hola mundo
-      run: echo "Hola mundo desde pipeline"
+      - name: Hola mundo
+        run: echo "Hola mundo desde pipeline"
