@@ -20,11 +20,11 @@ jobs:
         run: npm install
     
       - name: SC Scan
-        uses: SonarSource/sonarcloud-github-action@v3
+        uses: SonarSource/sonarcloud-github-action@v2
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR}}
         with:
-          args |
+          args: |
             -Dsonar.projectKey=sebalvarezch_laboratorio_final
             -Dsonar.organization=sebalvarezch
             -Dsonar.sources=.
