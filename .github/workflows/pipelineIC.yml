@@ -7,5 +7,16 @@ jobs:
   SAST:
     runs-on: ubuntu-latest
     steps:
-    - name: Hola mundo
-      run: echo "Hola mundo desde pipeline"
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+      
+      -name: Dependencies
+      run: npm install
+      
+      echo: 'Checkout, node y npm install done'
