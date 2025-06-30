@@ -56,6 +56,12 @@ jobs:
           --failOnCVSS 7
           --enableRetired
 
+    - name: Subir reporte
+      uses: actions/upload-artifact@master
+      with:
+        name: dependency-check-report
+        path: ${{github.workspace}}/reports
+
     - name: Verificar vulnerabilidades bloqueantes
       run: |
         echo "Escaneando reporte generado..."
@@ -66,11 +72,7 @@ jobs:
           echo "No se encontraron vulnerabilidades bloqueantes"
         fi
 
-    - name: Subir reporte
-      uses: actions/upload-artifact@master
-      with:
-        name: dependency-check-report
-        path: ${{github.workspace}}/reports
+    
 
 
 
