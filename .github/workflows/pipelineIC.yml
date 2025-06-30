@@ -56,7 +56,7 @@ jobs:
           --enableRetired
 
     - name: Subir reporte
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@master
       with:
         name: dependency-check-report
         path: ${{github.workspace}}/report
