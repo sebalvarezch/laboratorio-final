@@ -56,6 +56,16 @@ jobs:
           --failOnCVSS 7
           --enableRetired
 
+    - name: Verificar vulnerabilidades bloqueantes
+      run: |
+        echo "Escaneando reporte generado..."
+        if grep -E 'CVSS [7-9]\.|CRITICAL|HIGH' reports/dependency-check-report.html; then
+          echo " Vulnerabilidades criticas, altas o medias detectadas"
+          exit 1
+        else
+          echo "No se encontraron vulnerabilidades bloqueantes"
+        fi
+
     - name: Subir reporte
       uses: actions/upload-artifact@master
       with:
