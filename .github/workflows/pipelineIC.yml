@@ -87,12 +87,12 @@ jobs:
     - name: Login
       uses: docker/login-action@v3
       with:
-        username: ${{secrets.DOCKERHUB_USER}}
+        username: ${{secrets.DOCKERHUB_USERNAME}}
         password: ${{secrets.DOCKERHUB_TOKEN}}
 
     - name: push
       run: |
-        docker push ${{secrets.DOCKERHUB_USER}}/laboratorio-final:latest
+        docker push ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
 
   DockerScan:
     needs: Docker
@@ -103,7 +103,7 @@ jobs:
 
     - name: Pull
       run: |
-        docker pull ${{secrets.DOCKERHUB_USER}}/laboratorio-final:latest
+        docker pull ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
 
     - name: Run Trivy Scan 
       uses: aquasecurity/trivy-action@master
