@@ -120,10 +120,6 @@ jobs:
     runs-on: self-hosted
     steps:
 
-      - name: Eliminando container anterior 
-        run: |
-          docker rm -f laboratorio-final-deploy || true
-
       - name: Despliegue app
         run: |
           docker run -p 3000:3000 --name laboratorio-final-deploy -d ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
@@ -132,11 +128,8 @@ jobs:
         run: |
           sleep 30
 
-      - name: Instalar touch (opcional, si lo requiere)
-        run: sudo apt-get update && sudo apt-get install -y coreutils
-
       - name: ZAP
-        uses: zaproxy/action-baseline@v0.11.0
+        uses: zaproxy/action-baseline@v0.10.0
         with:
           target: 'http://localhost:3000'
 
