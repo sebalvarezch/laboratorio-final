@@ -128,11 +128,14 @@ jobs:
         run: |
           sleep 30
 
+      - name: Instalar touch (opcional, si lo requiere)
+        run: sudo apt-get update && sudo apt-get install -y coreutils
+
       - name: ZAP
         uses: zaproxy/action-baseline@v0.11.0
         with:
           target: 'http://localhost:3000'
-          
+
 
 
 
