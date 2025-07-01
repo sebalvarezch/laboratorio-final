@@ -128,10 +128,18 @@ jobs:
         run: |
           sleep 30
 
-      - name: ZAP
-        uses: zaproxy/action-baseline@v0.10.0
+      - name: Ejecutar ZAP como contenedor
+        run: |
+          docker run --network="host" `
+            -v ${PWD}:/zap/wrk/:rw `
+            ghcr.io/zaproxy/zaproxy:stable `
+            zap-baseline.py -t http://localhost:3000 -r zap_report.html
+
+      - name: Subir artefacto del reporte
+        uses: actions/upload-artifact@v3
         with:
-          target: 'http://localhost:3000'
+          name: zap-report
+          path: zap_report.html
 
 
 
