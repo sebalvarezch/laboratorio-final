@@ -83,7 +83,7 @@ jobs:
       uses: docker/setup-buildx-action@v3
 
     - name: Build Docker image
-      run: docker build -t movies-app:latest .
+      run: docker build -t laboratorio-final:latest .
 
 
 
