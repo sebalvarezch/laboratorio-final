@@ -120,6 +120,10 @@ jobs:
     runs-on: self-hosted
     steps:
 
+      - name: Eliminando container anterior 
+        run: |
+          docker rm -f laboratorio-final-deploy || true
+
       - name: Despliegue app
         run: |
           docker run -p 3000:3000 --name laboratorio-final-deploy -d ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
