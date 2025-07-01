@@ -136,7 +136,7 @@ jobs:
             zap-baseline.py -t http://localhost:3000 -r zap_report.html
 
       - name: Subir artefacto del reporte
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@master
         with:
           name: zap-report
           path: zap_report.html
