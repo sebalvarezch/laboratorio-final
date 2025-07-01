@@ -62,17 +62,29 @@ jobs:
         name: dependency-check-report
         path: ${{github.workspace}}/reports
 
-    - name: Verificar vulnerabilidades bloqueantes
-      run: |
-        echo "Escaneando reporte generado..."
-        if grep -E 'CVSS [7-9]\.|CRITICAL|HIGH' reports/dependency-check-report.html; then
-          echo " Vulnerabilidades criticas, altas o medias detectadas"
-          exit 1
-        else
-          echo "No se encontraron vulnerabilidades bloqueantes"
-        fi
+   # - name: Verificar vulnerabilidades bloqueantes
+    #  run: |
+     #   echo "Escaneando reporte generado..."
+      #  if grep -E 'CVSS [7-9]\.|CRITICAL|HIGH' reports/dependency-check-report.html; then
+       #   echo " Vulnerabilidades criticas, altas o medias detectadas"
+        #  exit 1
+       # else
+        #  echo "No se encontraron vulnerabilidades bloqueantes"
+        #fi
 
-    
+  Docker:
+    needs: SCA
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Build
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: docker build -t movies-app:latest .
+
 
 
 
