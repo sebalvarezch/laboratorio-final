@@ -84,6 +84,13 @@ jobs:
     - name: Build Docker image
       run: docker build -t laboratorio-final:latest .
 
+  DockerScan:
+    needs: Docker
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
     - name: Run Trivy Scan 
       uses: aquasecurity/trivy-action@master
       with:
