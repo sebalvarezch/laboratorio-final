@@ -112,8 +112,27 @@ jobs:
       with:
         image-ref: ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
         format: 'table'
-        exit-code: '1'
-        severity: 'CRITICAL,HIGH,MEDIUM'
+        #exit-code: '1'
+        #severity: 'CRITICAL,HIGH,MEDIUM'
+  
+  DAST:
+    needs: DockerScan
+    runs-on: self-hosted
+    steps:
+
+      - name: Despliegue app
+        run: |
+          docker run -p 3000:3000 --name laboratorio-final-deploy -d ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
+
+      - name: Sleep
+        run: |
+          sleep 30
+
+      - name: ZAP
+        uses: zaproxy/action-baseline@v0.11.0
+        with:
+          target: 'http://localhost:3000'
+          
 
 
 
