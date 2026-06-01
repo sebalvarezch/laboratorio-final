@@ -25,19 +25,20 @@ jobs:
         run: npm install
 
       - name: SC Scan
-        # Reemplaza a sonarcloud-github-action (archivada el 22-oct-2025).
-        # sonarqube-scan-action es drop-in replacement para Cloud y Server.
-        uses: SonarSource/sonarqube-scan-action@v5
+        # sonarqube-scan-action reemplaza a la archivada sonarcloud-github-action (sirve para Cloud y Server).
+        # v6 reescribió la action en JS para cerrar la vulnerabilidad de inyección de comandos.
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR }}
-          SONAR_HOST_URL: https://sonarcloud.io   # ahora va por env, no por -Dsonar.host.url
+          SONAR_HOST_URL: https://sonarcloud.io
+        # IMPORTANTE: NO pongas comentarios (#) dentro de 'args: |'. En un bloque literal de YAML
+        # el # NO es comentario: se envia literal al scanner y rompe con "Unrecognized option: #".
+        # Sonar detecta la rama automaticamente desde el CI, asi que no necesitas sonar.branch.name.
         with:
           args: |
             -Dsonar.projectKey=sebalvarezch_laboratorio-final
             -Dsonar.organization=sebalvarezch
             -Dsonar.sources=.
-            # -Dsonar.branch.name=main   # OJO: estabas en rama 'pipe'. Deja que Sonar detecte la rama
-            #                              o ajústalo a la rama real para no mezclar reportes.
    #  - name: Chequeo de calidad
    #    uses: SonarSource/sonarqube-quality-gate-action@master
    #    env:
