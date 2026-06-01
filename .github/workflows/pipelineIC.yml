@@ -1,128 +1,141 @@
 name: Workflow
-on: 
+on:
   push:
     branches:
       - pipe
+      # - main          # descomenta si también quieres dispararlo en main
+  # pull_request:        # patrón sano: validar en PR hacia main sin gastar todo en cada push
+  #   branches: [ main ]
+
 jobs:
   SAST:
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # Sonar recomienda clones no superficiales para mejor relevancia
 
       - name: Set node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-         node-version: 18
-      
+          node-version: 20         # 18 está EOL; 20 es LTS vigente
+
       - name: Dependencies
         run: npm install
-    
+
       - name: SC Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        env: 
+        # Reemplaza a sonarcloud-github-action (archivada el 22-oct-2025).
+        # sonarqube-scan-action es drop-in replacement para Cloud y Server.
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
           SONAR_TOKEN: ${{ secrets.SONAR }}
+          SONAR_HOST_URL: https://sonarcloud.io   # ahora va por env, no por -Dsonar.host.url
         with:
           args: |
             -Dsonar.projectKey=sebalvarezch_laboratorio-final
             -Dsonar.organization=sebalvarezch
             -Dsonar.sources=.
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.branch.name=main
-
+            # -Dsonar.branch.name=main   # OJO: estabas en rama 'pipe'. Deja que Sonar detecte la rama
+            #                              o ajústalo a la rama real para no mezclar reportes.
    #  - name: Chequeo de calidad
-   #    uses: sonarsource/sonarqube-quality-gate-action@master
-    #   env: 
-    #     SONAR_TOKEN: ${{ secrets.SONAR }}
+   #    uses: SonarSource/sonarqube-quality-gate-action@master
+   #    env:
+   #      SONAR_TOKEN: ${{ secrets.SONAR }}
 
   SCA:
     needs: SAST
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Dependency Check
-      uses: dependency-check/Dependency-Check_Action@1.1.0
-      env:
-        JAVA_HOME: /opt/jdk
+      # 1.1.0 es pre-9.0.0 (era del data-feed NVD, ya retirado). 12.2.2 usa la API del NVD.
+      uses: dependency-check/Dependency-Check_Action@12.2.2
       with:
-        project: ${{github.event.repository.name}}
+        project: ${{ github.event.repository.name }}
         path: '.'
         format: 'HTML'
         args: >
+          --nvdApiKey ${{ secrets.NVD_API_KEY }}
           --failOnCVSS 7
           --enableRetired
+      # Sin --nvdApiKey la actualización del NVD da 403/timeout. Solicítala gratis en:
+      # https://nvd.nist.gov/developers/request-an-api-key
 
     - name: Subir reporte
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v4   # v3/@master ya no funcionan (deprecadas 30-ene-2025)
       with:
         name: dependency-check-report
-        path: ${{github.workspace}}/reports
-
-   # - name: Verificar vulnerabilidades bloqueantes
-    #  run: |
-     #   echo "Escaneando reporte generado..."
-      #  if grep -E 'CVSS [7-9]\.|CRITICAL|HIGH' reports/dependency-check-report.html; then
-       #   echo " Vulnerabilidades criticas, altas o medias detectadas"
-        #  exit 1
-       # else
-        #  echo "No se encontraron vulnerabilidades bloqueantes"
-        #fi
+        path: ${{ github.workspace }}/reports
 
   Docker:
     needs: SCA
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Docker Build
       uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker image
-      run: |
-        docker build -t laboratorio-final:latest .
-        docker tag laboratorio-final:latest ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
-
     - name: Login
       uses: docker/login-action@v3
       with:
-        username: ${{secrets.DOCKERHUB_USERNAME}}
-        password: ${{secrets.DOCKERHUB_TOKEN}}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build Docker image
+      run: |
+        docker build -t laboratorio-final:latest .
+        docker tag laboratorio-final:latest ${{ secrets.DOCKERHUB_USERNAME }}/laboratorio-final:latest
 
     - name: push
       run: |
-        docker push ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/laboratorio-final:latest
 
   DockerScan:
     needs: Docker
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+
+    # Si tu repo de Docker Hub es privado, necesitas login para el pull. Si es público, puedes quitarlo.
+    - name: Login
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Pull
       run: |
-        docker pull ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
+        docker pull ${{ secrets.DOCKERHUB_USERNAME }}/laboratorio-final:latest
 
-    - name: Run Trivy Scan 
-      uses: aquasecurity/trivy-action@master
+    - name: Run Trivy Scan
+      # IMPORTANTE: NO uses @master. Tras el ataque de cadena de suministro de marzo/2026
+      # (tags envenenados), lo recomendado es fijar el SHA COMPLETO del commit, p.ej.:
+      #   uses: aquasecurity/trivy-action@<sha_completo_40_chars>   # = release v0.33.1 (o posterior)
+      # Como mínimo, fija un tag de versión y verifica el SHA en el repo antes de usarlo:
+      uses: aquasecurity/trivy-action@0.33.1
       with:
-        image-ref: ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
+        image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/laboratorio-final:latest
         format: 'table'
         #exit-code: '1'
         #severity: 'CRITICAL,HIGH,MEDIUM'
-  
+
   DAST:
     needs: DockerScan
+    # NOTA: requiere que tu runner self-hosted esté registrado y EN LÍNEA.
+    # Si lleva un año apagado, este job se queda encolado indefinidamente.
+    # Las comillas invertidas (`) de abajo son continuación de línea de PowerShell,
+    # así que este job asume un runner self-hosted WINDOWS. Si cambiaste de runner, ajústalo.
     runs-on: self-hosted
     steps:
-
       - name: Despliegue app
         run: |
-          docker run -p 3000:3000 --name laboratorio-final-deploy -d ${{secrets.DOCKERHUB_USERNAME}}/laboratorio-final:latest
+          docker run -p 3000:3000 --name laboratorio-final-deploy -d ${{ secrets.DOCKERHUB_USERNAME }}/laboratorio-final:latest
 
       - name: Sleep
         run: |
@@ -137,12 +150,7 @@ jobs:
         continue-on-error: true
 
       - name: Subir artefacto del reporte
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4   # idem: ya no sirve @master
         with:
           name: zap-report
           path: zap_report.html
-
-
-
-
-
