@@ -123,7 +123,7 @@ jobs:
       # (tags envenenados), lo recomendado es fijar el SHA COMPLETO del commit, p.ej.:
       #   uses: aquasecurity/trivy-action@<sha_completo_40_chars>   # = release v0.33.1 (o posterior)
       # Como mínimo, fija un tag de versión y verifica el SHA en el repo antes de usarlo:
-      uses: aquasecurity/trivy-action@0.33.1
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
       with:
         image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/laboratorio-final:latest
         format: 'table'
