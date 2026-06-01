@@ -63,7 +63,6 @@ jobs:
         path: '.'
         format: 'HTML'
         args: >
-          --nvdApiKey ${{ secrets.NVD_API_KEY }}
           --failOnCVSS 7
           --enableRetired
       # Sin --nvdApiKey la actualización del NVD da 403/timeout. Solicítala gratis en:
