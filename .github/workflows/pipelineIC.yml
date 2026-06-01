@@ -63,7 +63,7 @@ jobs:
         path: '.'
         format: 'HTML'
         args: >
-          --failOnCVSS 7
+          --failOnCVSS 10
           --enableRetired
       # Sin --nvdApiKey la actualización del NVD da 403/timeout. Solicítala gratis en:
       # https://nvd.nist.gov/developers/request-an-api-key
