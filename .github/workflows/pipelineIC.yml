@@ -38,6 +38,7 @@ jobs:
           args: |
             -Dsonar.projectKey=sebalvarezch_laboratorio-final
             -Dsonar.organization=sebalvarezch
+            -Dsonar.branch.name=main
             -Dsonar.sources=.
    #  - name: Chequeo de calidad
    #    uses: SonarSource/sonarqube-quality-gate-action@master
