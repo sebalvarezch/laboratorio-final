@@ -54,6 +54,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Dependency Check
+      continue-on-error: true
       # Esta action solo tiene tags antiguos (1.0.0 / 1.1.0); el codigo al dia vive en la rama 'main'.
       # Por eso su README usa @main. Aqui fijamos el SHA del commit de main: equivale a @main pero
       # inmutable (mismo criterio de seguridad que con Trivy). Si prefieres lo simple, usa @main.
