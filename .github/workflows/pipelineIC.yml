@@ -132,30 +132,27 @@ jobs:
 
   DAST:
     needs: DockerScan
-    # NOTA: requiere que tu runner self-hosted esté registrado y EN LÍNEA.
-    # Si lleva un año apagado, este job se queda encolado indefinidamente.
-    # Las comillas invertidas (`) de abajo son continuación de línea de PowerShell,
-    # así que este job asume un runner self-hosted WINDOWS. Si cambiaste de runner, ajústalo.
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Despliegue app
         run: |
           docker run -p 3000:3000 --name laboratorio-final-deploy -d ${{ secrets.DOCKERHUB_USERNAME }}/laboratorio-final:latest
 
-      - name: Sleep
-        run: |
-          sleep 30
+      - name: Esperar a que la app levante
+        run: sleep 30
 
-      - name: Ejecutar ZAP como contenedor
+      - name: Ejecutar ZAP Baseline
         run: |
-          docker run --network="host" `
-            -v ${PWD}:/zap/wrk/:rw `
-            ghcr.io/zaproxy/zaproxy:stable `
+          chmod 777 "$PWD"
+          docker run --network="host" \
+            -v "$PWD":/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py -t http://localhost:3000 -r zap_report.html
         continue-on-error: true
 
       - name: Subir artefacto del reporte
-        uses: actions/upload-artifact@v4   # idem: ya no sirve @master
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: zap-report
           path: zap_report.html
